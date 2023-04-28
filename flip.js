@@ -36,7 +36,7 @@
 
     // Create a div to hold the user interface
     const uiDiv = document.createElement('div');
-    uiDiv.id = 'Flip XL';
+    uiDiv.id = 'Flip VS CODE';
     uiDiv.style.position = 'fixed';
     uiDiv.style.top = '800px';
     uiDiv.style.left = '48px';
