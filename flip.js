@@ -392,7 +392,7 @@
             console.log("After: " + newKeyPresses);
             return newKeyPresses;
         }
-s        
+
 
 
     function simulateKeyPress(key) {
