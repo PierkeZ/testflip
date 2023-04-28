@@ -28,9 +28,11 @@
     let keyPresses = [];
     // Define the array to store the last sequence key presses
     let fillHerUp = ['P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q'];
+    console.log('fillHerUp: ' + fillHerUp); 
     let lastKeyPresses = ['P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q'];
+    console.log('lastKeyPresses: ' + lastKeyPresses);   
     let newKeyPresses = ['P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q','P','Q'];
-    let currentKeyPresses = [];
+    console.log('newKeyPresses: ' + newKeyPresses); 
 
     // Create a div to hold the user interface
     const uiDiv = document.createElement('div');
@@ -257,8 +259,6 @@
 
     }
     function runSimulation() {
-        let lastKeyPresses = [];
-        let newKeyPresses = [];
         let fieldValue = parseInt(inputField.value);
         gamevalue = 0;
         gamevalue = parseFloat(document.querySelector('.coinflip-left .t').innerText);
@@ -325,7 +325,7 @@
                 newKeyPresses = getArrayToPlay();
                 lastKeyPresses.length = 0;
 
-                console.log(newKeyPresses);
+                console.log("jumped into isbuttonactive:" + newKeyPresses);
                 iAr=0;
                 //console.log('BetButton is active. Simulating key press: Space');
                 simulateKeyPress(' ');
@@ -349,45 +349,57 @@
 
         } }
 
-    function getArrayToPlay() {
-
-        console.log("before: " + lastKeyPresses);
-        let newKeyPresses = [];
-
-        //depending on the selected mode, the array will be prepped differently
-        if (simulationMode === SIMULATION_MODES.RANDOM) {
-            newKeyPresses.length = 0; //clear the array
-            while (newKeyPresses.length < 15) {
-                newKeyPresses.push(getKeyPressRandom()); // add random Q or P untill array length is 15
+        function getArrayToPlay() {
+            console.log("before: " + lastKeyPresses);
+            let newKeyPresses = [];
+        
+            //depending on the selected mode, the array will be prepped differently
+            switch (simulationMode) {
+                case SIMULATION_MODES.RANDOM:
+                    while (newKeyPresses.length < 15) {
+                        newKeyPresses.push(getKeyPressRandom()); // add random Q or P until array length is 15
+                    }
+                    console.log("random: " + newKeyPresses);
+                    break;
+                case SIMULATION_MODES.PROCENT:
+                    while (newKeyPresses.length < 15) {
+                        newKeyPresses.push(getKeyPressPercentageMode()); // add random Q or P until array length, use delta as percentage
+                    }
+                    console.log("procent: " + newKeyPresses);
+                    break;
+                case SIMULATION_MODES.OPPOSITE:
+                    newKeyPresses = chooseOppositeAll();
+                    console.log("opposite: " + newKeyPresses);
+                    break;
+                case SIMULATION_MODES.FIRSTONEOPPOSITE:
+                    newKeyPresses = chooseOppositeFirst();
+                    console.log("firstoneopposite: " + newKeyPresses);
+                    break;
+                case SIMULATION_MODES.REVERSE:
+                    newKeyPresses = [...lastKeyPresses].reverse();
+                    console.log("reverse: " + newKeyPresses);
+                    break;
+                default:
+                    console.error(`Invalid simulation mode: ${simulationMode}`);
+                    break;
             }
-        }else if(simulationMode === SIMULATION_MODES.PROCENT){
-            newKeyPresses.length = 0; //clear the array
+        
+            // Always fill up the array until 15 to play with
             while (newKeyPresses.length < 15) {
-                newKeyPresses.push(getKeyPressPercentageMode()); // add random Q or P untill array length, use delta as percentage
+                newKeyPresses.push(getKeyPressRandom()); // add random Q or P until array length is 15
             }
-        }else if(simulationMode === SIMULATION_MODES.OPPOSITE){
-            newKeyPresses.length = 0; //clear the array
-            newKeyPresses = chooseOppositeAll();
-        }else if(simulationMode === SIMULATION_MODES.FIRSTONEOPPOSITE){
-            newKeyPresses.length = 0; //clear the array
-            newKeyPresses = chooseOppositeFirst();
-        }else if(simulationMode === SIMULATION_MODES.REVERSE){
-            newKeyPresses.length = 0; //clear the array
-            newKeyPresses = lastKeyPresses.reverse();
+        
+            console.log("After: " + newKeyPresses);
+            return newKeyPresses;
         }
-        //Always fill up the array until 15 to play with
-        if (newKeyPresses.length < 15) {
-            while (newKeyPresses.length < 15) {
-                newKeyPresses.push(getKeyPressRandom()); // add random Q or P untill array length is 15
-            }
-        }
-        console.log("After: " + newKeyPresses);
-        lastKeyPresses.length = 0;
-        return newKeyPresses;
-    }
+s        
 
 
     function simulateKeyPress(key) {
+        if (key == null) {
+            console.error('Key parameter is null or undefined');
+            return;
+        }
         logKeyPress(key);
         console.log(key);
         const keyCode = key.charCodeAt(0); // get the ASCII code for the key
