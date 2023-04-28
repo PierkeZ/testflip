@@ -322,8 +322,8 @@
                 //if previous results were less then 10 presses, fill up the array
                 console.log(lastKeyPresses);
 
-                newKeyPresses = getArrayToPlay();
-                lastKeyPresses.length = 0;
+                //newKeyPresses = getArrayToPlay();
+                //lastKeyPresses.length = 0;
 
                 console.log("jumped into isbuttonactive:" + newKeyPresses);
                 iAr=0;
@@ -342,9 +342,9 @@
                 console.log('Simulation paused.');
                 return;
             } else{
-                simulateKeyPress(newKeyPresses[iAr]);//each iteration the next element in newKeyPresses is used.
-                lastKeyPresses.push(newKeyPresses[iAr]);
-                iAr ++;
+                simulateKeyPress(getKeyPressRandom());//each iteration the next element in newKeyPresses is used.
+                //lastKeyPresses.push(newKeyPresses[iAr]);
+                //iAr ++;
             }
 
         } }
