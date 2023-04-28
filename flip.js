@@ -47,7 +47,7 @@
 
     // Create the user interface elements
     const title = document.createElement('h3');
-    title.innerText = 'Flip XL';
+    title.innerText = 'Flip VS Code';
 
     const info = document.createElement('p');
     info.innerText = 'Press the "Start" button to begin simulating key presses.';
