@@ -8,14 +8,13 @@
         FIRSTONEOPPOSITE: 'firstoneflipped',
         REVERSE: 'reverse',
         PROCENT: 'procent',
+        SLIGHTSAME: 'slightsame',
 
     };
 
     let simulationInterval = 300;
-    let modalShown = false;
     let simulationPaused = false;
     let deltaInputValue = 5;
-    let highestVal = null;
     let takeIt = false;
     let inputFieldValue = 10;
     let continueMode = false;
@@ -55,10 +54,10 @@
     // Create the input field element
     const inputField = document.createElement('input');
     inputField.type = 'number';
-    inputField.min = 0;
-    inputField.max = 1000;
-    inputField.value = 10;
-    inputField.addEventListener('change', (event) => {
+    inputField.min = '0';
+    inputField.max = '1000';
+    inputField.value = '10';
+    inputField.addEventListener('change', () => {
         inputFieldValue = inputField.value;
         console.log('Payout changed to.' + inputFieldValue);
     });
@@ -69,9 +68,9 @@
     const intervalInput = document.createElement('input');
     intervalInput.type = 'number';
     intervalInput.value = simulationInterval;
-    intervalInput.min = 100;
-    intervalInput.max = 5000;
-    intervalInput.step = 100;
+    intervalInput.min = '100';
+    intervalInput.max = '5000';
+    intervalInput.step = '100';
 
 
     // Create the delta compare input field
@@ -81,7 +80,7 @@
     deltaInput.type = 'number';
     deltaInput.value = deltaInputValue;
     deltaInput.addEventListener('change', (event) => {
-        deltaInputValue = deltaInput.value;
+        deltaInputValue = event.target.value;
         console.log('Delta changed to.' + deltaInputValue);
     });
 
@@ -90,9 +89,9 @@
     stopAmountLabel.innerText = 'Stop Amount: ';
     const stopAmountInput = document.createElement('input');
     stopAmountInput.type = 'number';
-    stopAmountInput.min = 0;
-    stopAmountInput.max = 1000;
-    stopAmountInput.step = 0.01;
+    stopAmountInput.min = '0';
+    stopAmountInput.max = '1000';
+    stopAmountInput.step = '0.01';
     stopAmountInput.value = stopAmount;
     stopAmountInput.addEventListener('change', (event) => {
         stopAmount = event.target.value;
@@ -125,6 +124,7 @@
         continueMode = event.target.checked;
         console.log('Continuemode changed to.' + continueMode);
     });
+
     // Create the take it checkbox
     const takeItLabel = document.createElement('label');
     takeItLabel.innerText = 'Take it: ';
@@ -247,7 +247,7 @@
         startButton.disabled = true;
         stopButton.disabled = false;
         info.innerText = 'Simulating key presses...';
-        simulationInterval = setInterval(runSimulation, intervalInput.value);
+        simulationInterval = setInterval(runSimulation, parseInt(intervalInput.value));
     }
 
     function stopSimulation() {
@@ -255,8 +255,6 @@
         startButton.disabled = false;
         stopButton.disabled = true;
         info.innerText = 'Simulation stopped.';
-        return;
-
     }
     function runSimulation() {
         let fieldValue = parseInt(inputField.value);
@@ -267,6 +265,7 @@
         if(getCurrentStack()<= stopAmount) {
             console.log('StopAmount reached: ' + stopAmount);
             gamevalue = 0;
+            iAr=0;
             stopSimulation();
             return;
         }
@@ -274,6 +273,7 @@
         if(gamevalue >= fieldValue && continueMode && takeIt) {
             console.log('Taking profit and continuing');
             simulateKeyPress('W');
+            iAr=0;
             stopSimulation();
             startSimulation();
             gamevalue = 0;
@@ -282,6 +282,7 @@
         if(gamevalue >= fieldValue && takeIt && !continueMode) {
             console.log('Taking profit and stopping');
             simulateKeyPress('W');
+            iAr=0;
             gamevalue = 0;
             stopSimulation();
 
@@ -319,14 +320,18 @@
                     return;
                 }
 
-                //if previous results were less then 10 presses, fill up the array
+                //if previous results were less than 10 presses, fill up the array
                 console.log(lastKeyPresses);
 
-                //newKeyPresses = getArrayToPlay();
-                //lastKeyPresses.length = 0;
+                newKeyPresses = getArrayToPlay();
+                // Always fill up the array until 15 to play with
+                while (newKeyPresses.length < 15) {
+                    newKeyPresses.push(getKeyPressRandom()); // add random Q or P until array length is 15
+                }
+                lastKeyPresses.length = 0;
 
                 console.log("jumped into isbuttonactive:" + newKeyPresses);
-                iAr=0;
+
                 //console.log('BetButton is active. Simulating key press: Space');
                 simulateKeyPress(' ');
                 //clear array
@@ -335,16 +340,14 @@
                 console.log('BetButton is not active.');
             }
         } else if (betButton == null && cashButton != null) {
-            const isCashButtonActive = !cashButton.disabled;
 
             // Check if the simulation is paused again before triggering a key press
             if (simulationPaused) {
                 console.log('Simulation paused.');
-                return;
             } else{
                 simulateKeyPress(getKeyPressRandom());//each iteration the next element in newKeyPresses is used.
-                //lastKeyPresses.push(newKeyPresses[iAr]);
-                //iAr ++;
+                lastKeyPresses.push(newKeyPresses[iAr]);
+                iAr ++;
             }
 
         } }
@@ -367,8 +370,14 @@
                     }
                     console.log("procent: " + newKeyPresses);
                     break;
+                case SIMULATION_MODES.SLIGHTSAME:
+                    while (newKeyPresses.length < 15) {
+                        newKeyPresses.push(chooseSlightlyTheSame()); // add random Q or P until array length, use delta as percentage
+                    }
+                    console.log("procent: " + newKeyPresses);
+                    break;
                 case SIMULATION_MODES.OPPOSITE:
-                    newKeyPresses = chooseOppositeAll();
+                    newKeyPresses =  chooseOppositeAll();
                     console.log("opposite: " + newKeyPresses);
                     break;
                 case SIMULATION_MODES.FIRSTONEOPPOSITE:
@@ -384,10 +393,7 @@
                     break;
             }
         
-            // Always fill up the array until 15 to play with
-            while (newKeyPresses.length < 15) {
-                newKeyPresses.push(getKeyPressRandom()); // add random Q or P until array length is 15
-            }
+
         
             console.log("After: " + newKeyPresses);
             return newKeyPresses;
@@ -418,8 +424,7 @@
 
     function getCurrentStack() {
         const amountSpan = document.querySelector('div.amount > span.amount-str');
-        const amountValue = parseFloat(amountSpan.innerText.replace('€ ', ''));
-        return amountValue;
+        return parseFloat(amountSpan.innerText.replace('€ ', ''));
     }
 
     function getKeyPressRandom() {
@@ -454,18 +459,17 @@
             return element.replace("Q", "temp").replace("P", "Q").replace("temp", "P");
         });
         console.log(swappedArray); // Output: ["Q", "P", "Q", "Q", "P"]
+        return swappedArray;
+
 
     }
-
-
 
 
     function chooseSlightlyTheSame() {
-        let shuffeledArray =[];
+        let shuffeledArray;
         shuffeledArray = shuffleArray(lastKeyPresses);
         return shuffeledArray;
     }
-
 
     function getKeyPressPercentageMode() {
         const random = Math.random() < (deltaInputValue / 100) ? 'Q' : 'P';
